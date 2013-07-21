@@ -16,6 +16,8 @@ vagrant plugin install vagrant-pristine
 ```
 Usage: vagrant pristine [vm-name]
 
+        --[no-]provision             Enable or disable provisioning
+        --provision-with x,y,z       Enable only certain provisioners, by type.
     -f, --force                      Destroy without confirmation.
         --[no-]parallel              Enable or disable parallelism if provider supports it.
         --provider provider          Back the machine with a specific provider.

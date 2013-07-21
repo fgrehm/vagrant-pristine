@@ -1,4 +1,6 @@
 require_relative 'version'
+require 'vagrant'
+require Vagrant.source_root.join('plugins/commands/up/start_mixins')
 
 module VagrantPlugins
   module Pristine
@@ -11,6 +13,8 @@ module VagrantPlugins
     end
 
     class Command < Vagrant.plugin(2, :command)
+      include VagrantPlugins::CommandUp::StartMixins
+
       def execute
         options = {
           force:    false,
@@ -21,6 +25,8 @@ module VagrantPlugins
           o.banner = "Usage: vagrant pristine [vm-name]"
           o.separator ""
 
+          build_start_options(o, options)
+
           o.on("-f", "--force", "Destroy without confirmation.") do |f|
             options[:force] = f
           end
@@ -29,7 +35,6 @@ module VagrantPlugins
                "Enable or disable parallelism if provider supports it.") do |parallel|
             options[:parallel] = parallel
           end
-
 
           o.on("--provider provider", String,
                "Back the machine with a specific provider.") do |provider|
