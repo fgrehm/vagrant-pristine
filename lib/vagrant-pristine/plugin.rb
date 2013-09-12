@@ -62,6 +62,7 @@ module VagrantPlugins
         # Build up the batch job of what we'll do
         @env.batch(options[:parallel]) do |batch|
           with_target_vms(argv, :provider => options[:provider]) do |machine|
+            FileUtils.mkdir_p machine.data_dir.to_s
             @env.ui.info(I18n.t(
               "vagrant.commands.up.upping",
               :name => machine.name,
