@@ -3,6 +3,11 @@
 Restore your vagrant machines to a pristine state with a single command. Basically
 the same as runnning a `vagrant destroy && vagrant up`.
 
+**DEPRECATED**: Similar functionality is likely to be provided by a future Vagrant release, see the issues below for more
+- https://github.com/mitchellh/vagrant/issues/5378
+- https://github.com/mitchellh/vagrant/pull/5410
+- https://github.com/mitchellh/vagrant/pull/5613
+
 ## Installation
 
 Make sure you have Vagrant 1.2+ and run:
