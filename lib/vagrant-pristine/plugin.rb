@@ -1,6 +1,7 @@
 require_relative 'version'
 require 'vagrant'
 require Vagrant.source_root.join('plugins/commands/up/start_mixins')
+require Vagrant.source_root.join('plugins/commands/box/command/download_mixins')
 
 module VagrantPlugins
   module Pristine
@@ -14,6 +15,7 @@ module VagrantPlugins
 
     class Command < Vagrant.plugin(2, :command)
       include VagrantPlugins::CommandUp::StartMixins
+      include VagrantPlugins::CommandBox::DownloadMixins
 
       def execute
         options = {
@@ -63,6 +65,30 @@ module VagrantPlugins
         @env.batch(options[:parallel]) do |batch|
           with_target_vms(argv, :provider => options[:provider]) do |machine|
             FileUtils.mkdir_p machine.data_dir.to_s
+
+            box = machine.box
+            @env.ui.output(I18n.t("vagrant.box_update_checking", name: machine.name))
+
+            update = box.has_update?
+            if !update
+              @env.ui.success(I18n.t(
+                "vagrant.box_up_to_date_single",
+                name: box.name, version: box.version))
+            end
+
+            @env.ui.output(I18n.t(
+              "vagrant.box_updating",
+              name: update[0].name,
+              provider: update[2].name,
+              old: box.version,
+              new: update[1].version))
+            @env.action_runner.run(Vagrant::Action.action_box_add, {
+              box_url: box.metadata_url,
+              box_provider: update[2].name,
+              box_version: update[1].version,
+              ui: @env.ui
+            })
+
             @env.ui.info(I18n.t(
               "vagrant.commands.up.upping",
               :name => machine.name,
