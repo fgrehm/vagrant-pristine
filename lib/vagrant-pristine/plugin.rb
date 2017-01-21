@@ -74,20 +74,20 @@ module VagrantPlugins
               @env.ui.success(I18n.t(
                 "vagrant.box_up_to_date_single",
                 name: box.name, version: box.version))
+            else
+              @env.ui.output(I18n.t(
+                "vagrant.box_updating",
+                name: update[0].name,
+                provider: update[2].name,
+                old: box.version,
+                new: update[1].version))
+              @env.action_runner.run(Vagrant::Action.action_box_add, {
+                box_url: box.metadata_url,
+                box_provider: update[2].name,
+                box_version: update[1].version,
+                ui: @env.ui
+              })
             end
-
-            @env.ui.output(I18n.t(
-              "vagrant.box_updating",
-              name: update[0].name,
-              provider: update[2].name,
-              old: box.version,
-              new: update[1].version))
-            @env.action_runner.run(Vagrant::Action.action_box_add, {
-              box_url: box.metadata_url,
-              box_provider: update[2].name,
-              box_version: update[1].version,
-              ui: @env.ui
-            })
 
             @env.ui.info(I18n.t(
               "vagrant.commands.up.upping",
