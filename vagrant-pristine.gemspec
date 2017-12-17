@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["fgrehm@gmail.com"]
   spec.description   = %q{Vagrant destroy && up made simple}
   spec.summary       = spec.description
-  spec.homepage      = "https://github.com/fgrehm/vagrant-recreate"
+  spec.homepage      = "https://github.com/fgrehm/vagrant-pristine"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files`.split($/)

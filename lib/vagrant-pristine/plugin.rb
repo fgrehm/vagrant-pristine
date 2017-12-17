@@ -20,7 +20,8 @@ module VagrantPlugins
       def execute
         options = {
           force:    false,
-          parallel: true
+          parallel: true,
+          update:   true
         }
 
         opts = OptionParser.new do |o|
@@ -42,6 +43,10 @@ module VagrantPlugins
                "Back the machine with a specific provider.") do |provider|
             options[:provider] = provider
           end
+
+          o.on("--[no-]update", "Enable or disable box update.") do |update|
+            options[:update] = update
+          end
         end
 
         # Parse the options
@@ -61,46 +66,54 @@ module VagrantPlugins
         # Success if no confirms were declined
         return 1 if declined
 
-        with_target_vms(argv, :provider => options[:provider]) do |machine|
+          # Build up the batch job of what we'll do
+          @env.batch(options[:parallel]) do |batch|
+            with_target_vms(argv, :provider => options[:provider]) do |machine|
+              if options[:update]
+                begin
+                  box = machine.box
+                  if box
+                    @env.ui.output(I18n.t("vagrant.box_update_checking", name: machine.name))
 
-        end
+                    update = box.has_update?
+                    if !update
+                      @env.ui.success(I18n.t(
+                        "vagrant.box_up_to_date_single",
+                        name: box.name, version: box.version))
+                    else
+                      @env.ui.output(I18n.t(
+                        "vagrant.box_updating",
+                        name: update[0].name,
+                        provider: update[2].name,
+                        old: box.version,
+                        new: update[1].version))
+                      @env.action_runner.run(Vagrant::Action.action_box_add, {
+                        box_url: box.metadata_url,
+                        box_provider: update[2].name,
+                        box_version: update[1].version,
+                        ui: @env.ui
+                      })
 
-        # Build up the batch job of what we'll do
-        @env.batch(options[:parallel]) do |batch|
-          with_target_vms(argv, :provider => options[:provider]) do |machine|
-            box = machine.box
-            if box
-              @env.ui.output(I18n.t("vagrant.box_update_checking", name: machine.name))
-
-              update = box.has_update?
-              if !update
-                @env.ui.success(I18n.t(
-                  "vagrant.box_up_to_date_single",
-                  name: box.name, version: box.version))
+                      machine.box = @env.boxes.find(update[0].name, update[2].name, update[1].version)
+                    end
+                  end
+                rescue Exception => e
+                  # exception will be logged to ui but not thrown, box update failure is not fatal
+                  @env.ui.warn e
+                end
               else
-                @env.ui.output(I18n.t(
-                  "vagrant.box_updating",
-                  name: update[0].name,
-                  provider: update[2].name,
-                  old: box.version,
-                  new: update[1].version))
-                @env.action_runner.run(Vagrant::Action.action_box_add, {
-                  box_url: box.metadata_url,
-                  box_provider: update[2].name,
-                  box_version: update[1].version,
-                  ui: @env.ui
-                })
-                
-                machine.box = @env.boxes.find(update[0].name, update[2].name, update[1].version)
+                @env.ui.output(I18n.t("vagrant.box_update_checking", name: machine.name)+" skipped")
               end
-            end
 
-            FileUtils.mkdir_p machine.data_dir.to_s
+              # turn off default update check
+              machine.config.instance_variable_get(:@keys)[:vm].instance_variable_set(:@box_check_update, false)
 
-            @env.ui.info(I18n.t(
-              "vagrant.commands.up.upping",
-              :name => machine.name,
-              :provider => machine.provider_name))
+              FileUtils.mkdir_p machine.data_dir.to_s
+
+              @env.ui.info(I18n.t(
+                "vagrant.commands.up.upping",
+                :name => machine.name,
+                :provider => machine.provider_name))
 
               batch.action(machine, :up, options)
           end
