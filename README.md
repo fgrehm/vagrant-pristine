@@ -3,7 +3,7 @@
 Restore your vagrant machines to a pristine state with a single command. Basically
 the same as runnning a `vagrant destroy && vagrant up`.
 
-**DEPRECATED**: Similar functionality is likely to be provided by a future Vagrant release, see the issues below for more
+Similar functionality may be provided by a future Vagrant release, see the issues below for more information:
 - https://github.com/mitchellh/vagrant/issues/5378
 - https://github.com/mitchellh/vagrant/pull/5410
 - https://github.com/mitchellh/vagrant/pull/5613
@@ -26,6 +26,7 @@ Usage: vagrant pristine [vm-name]
     -f, --force                      Destroy without confirmation.
         --[no-]parallel              Enable or disable parallelism if provider supports it.
         --provider provider          Back the machine with a specific provider.
+        --[no-]update                Enable or disable box update.
     -h, --help                       Print this help
 ```
 
@@ -36,7 +37,4 @@ Usage: vagrant pristine [vm-name]
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new Pull Request
-
-
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/fgrehm/vagrant-pristine/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
 
