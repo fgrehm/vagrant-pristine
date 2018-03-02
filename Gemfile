@@ -5,6 +5,4 @@ gemspec
 
 group :development do
   gem 'vagrant',         github: 'mitchellh/vagrant'
-  gem 'vagrant-lxc',     github: 'fgrehm/vagrant-lxc'
-  gem 'vagrant-cachier', github: 'fgrehm/vagrant-cachier'
 end
